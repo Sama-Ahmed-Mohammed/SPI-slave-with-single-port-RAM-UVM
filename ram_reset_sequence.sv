@@ -15,7 +15,6 @@ package ram_reset_sequence_pkg;
 
         task body();
             `uvm_info("BODY", "entered reset sequence body", UVM_MEDIUM)
-
                 itm = ram_sequence_item::type_id::create("itm");
 
                 start_item(itm);
@@ -24,11 +23,15 @@ package ram_reset_sequence_pkg;
                 itm.din = 0;
                 itm.rx_valid =0;
 
-                @(negedge itm.clk);
+                #5;
 
                 itm.rst_n = 1;
-                
+
                 finish_item(itm);
+
+
         endtask
     endclass
 endpackage
+
+

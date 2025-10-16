@@ -37,8 +37,28 @@ package ram_sequence_item_pkg;
       din[ADDR_SIZE+1:ADDR_SIZE] == curr_op;
     }
 
+    constraint write_c{
+      // Write Address (00)
+      if (prev_op == 2'b00)
+        curr_op inside {2'b00, 2'b01};
+
+      // Write Data (01)
+      else if (prev_op == 2'b01)
+        curr_op inside {2'b00};
+    }
+
+    constraint read_c{
+      // Read Address (10)
+      if (prev_op == 2'b10)
+        curr_op == 2'b11;
+
+      // Read Data (11)
+      else if (prev_op == 2'b11)
+        curr_op inside {2'b10};
+    }
+
     // Randomize the operation according to previous one
-    constraint operation_seq_c {
+    constraint random_w_r {
       // Write Address (00)
       if (prev_op == 2'b00)
         curr_op inside {2'b00, 2'b01};
@@ -56,11 +76,6 @@ package ram_sequence_item_pkg;
         curr_op dist {2'b00 := 60, 2'b10 := 40};
     }
 
-    // ===== Randomization Hooks =====
-    function void pre_randomize();
-      // Could add logic to force reset or start sequence here if needed
-    endfunction
-
     function void post_randomize();
       // Update prev_op for next item
       prev_op = curr_op;
@@ -68,13 +83,13 @@ package ram_sequence_item_pkg;
 
     // ===== Debug Print Functions =====
     function string convert2string();
-      return $sformatf("%s rst_n=%0b rx_valid=%0b din=%h (op=%b)",
+      return $sformatf("%s rst_n=%0b, rx_valid=%0b, din=%0d, op=%b, rx_valid=%0b, dout=%0d",
                         super.convert2string(),
-                        rst_n, rx_valid, din, curr_op);
+                        rst_n, rx_valid, din, curr_op, rx_valid, dout);
     endfunction
 
     function string convert2string_stimulus();
-      return $sformatf("rst_n=%0b rx_valid=%0b din=%h (op=%b)",
+      return $sformatf("rst_n=%0b rx_valid=%0b din=%h, op=%b",
                         rst_n, rx_valid, din, curr_op);
     endfunction
 

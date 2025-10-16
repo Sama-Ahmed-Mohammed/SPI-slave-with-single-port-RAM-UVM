@@ -21,27 +21,21 @@ package ram_monitor_pkg;
             mon_ap = new("mon_ap", this);
         endfunction
 
-
         task run_phase(uvm_phase phase);
             super.run_phase(phase);
 
             forever begin
+                @(posedge mon_if.clk);
                 itm = ram_sequence_item::type_id::create("itm");
-
-                itm.clk = mon_if.clk;
-                itm.rst_n = mon_if.cb.rst_n;
-                
-                itm.rx_valid = mon_if.cb.rx_valid;
-                itm.din = mon_if.cb.din;
-                itm.tx_valid = mon_if.cb.tx_valid;
-                itm.dout = mon_if.cb.dout;
-
-                @(negedge mon_if.cb.clk);
+                itm.rst_n    = mon_if.rst_n;
+                itm.rx_valid = mon_if.rx_valid;
+                itm.din      = mon_if.din;
+                itm.tx_valid = mon_if.tx_valid;
+                itm.dout     = mon_if.dout;
+                `uvm_info("MONITOR", itm.convert2string(), UVM_LOW)
 
                 mon_ap.write(itm);
-                `uvm_info("MONITOR", itm.convert2string(), UVM_HIGH)
             end
-
         endtask
     endclass
 endpackage

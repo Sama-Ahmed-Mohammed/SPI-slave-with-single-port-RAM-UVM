@@ -43,6 +43,7 @@ package ram_scoreboard_pkg;
                 if ((tx_valid_ref != itm.tx_valid) || dout_ref !== itm.dout) begin
                     `uvm_error("SCOREBOARD", $sformatf("Data mismatch! Expected: %0h, Got: %0h", dout_ref, itm.dout))
                     error_count ++ ;
+                    //$stop;
                 end
                 else correct_count ++;
             end
@@ -94,7 +95,7 @@ package ram_scoreboard_pkg;
                     end
 
                     default: begin
-                        dout_ref      = '0;
+                        //dout_ref      = '0;
                         tx_valid_ref  = 0;
                     end
                 endcase

@@ -19,11 +19,13 @@ module ram_assertions (din,clk,rst_n,rx_valid,dout,tx_valid);
 
   property p_reset_outputs_low;
     @(posedge clk)
-      !rst_n |-> (tx_valid == 0 && dout == '0);
+      !rst_n |=> (tx_valid == 0 && dout == '0);
   endproperty
 
   a_reset_outputs_low: assert property (p_reset_outputs_low)
-    else `uvm_error("ASSERT", "During reset, tx_valid or dout not low!");
+    else $error("ASSERT", "During reset, tx_valid or dout not low!");
+
+  c_reset_outputs_low: cover property (p_reset_outputs_low);
 
   // ============================================================
   // During Address/Data Input Phases → tx_valid must be 0
@@ -32,11 +34,13 @@ module ram_assertions (din,clk,rst_n,rx_valid,dout,tx_valid);
 
   property p_tx_valid_during_input;
     @(posedge clk)
-      (op_type inside {2'b00, 2'b01, 2'b10}) |-> !tx_valid;
+      (op_type inside {2'b00, 2'b01, 2'b10}) |=> !tx_valid;
   endproperty
 
   a_tx_valid_during_input: assert property (p_tx_valid_during_input)
-    else `uvm_error("ASSERT", "tx_valid asserted during input phase!");
+    else $error("ASSERT", "tx_valid asserted during input phase!");
+
+  c_tx_valid_during_input: cover property (p_tx_valid_during_input);
 
   // ============================================================
   // After Read Data (2'b11) → tx_valid should rise for 1 cycle then fall
@@ -49,7 +53,9 @@ module ram_assertions (din,clk,rst_n,rx_valid,dout,tx_valid);
   endproperty
 
   a_tx_valid_pulse_after_read: assert property (p_tx_valid_pulse_after_read)
-    else `uvm_error("ASSERT", "tx_valid did not behave correctly after read data!");
+    else $error("ASSERT", "tx_valid did not behave correctly after read data!");
+
+  c_tx_valid_pulse_after_read: cover property (p_tx_valid_pulse_after_read);
 
   // ============================================================
   // Every Write Address must be eventually followed by Write Data
@@ -57,11 +63,13 @@ module ram_assertions (din,clk,rst_n,rx_valid,dout,tx_valid);
 
   property p_write_addr_followed_by_write_data;
     @(posedge clk)
-      (op_type == 2'b00 && rx_valid) |-> ##[1:$] (op_type == 2'b01);
+      (op_type == 2'b00 && rx_valid) |=> ##[1:$] (op_type == 2'b01);
   endproperty
 
   a_write_addr_followed_by_write_data: assert property (p_write_addr_followed_by_write_data)
-    else `uvm_error("ASSERT", "Write Address not followed by Write Data!");
+    else $error("ASSERT", "Write Address not followed by Write Data!");
+
+  c_write_addr_followed_by_write_data: cover property (p_write_addr_followed_by_write_data);
 
   // ============================================================
   // Every Read Address must be eventually followed by Read Data
@@ -69,17 +77,13 @@ module ram_assertions (din,clk,rst_n,rx_valid,dout,tx_valid);
 
   property p_read_addr_followed_by_read_data;
     @(posedge clk)
-      (op_type == 2'b10 && rx_valid) |-> ##[1:$] (op_type == 2'b11);
+      (op_type == 2'b10 && rx_valid) |=> ##[1:$] (op_type == 2'b11);
   endproperty
 
   a_read_addr_followed_by_read_data: assert property (p_read_addr_followed_by_read_data)
-    else `uvm_error("ASSERT", "Read Address not followed by Read Data!");
+    else $error("ASSERT", "Read Address not followed by Read Data!");
 
-  // ============================================================
-  // (Optional) Coverage for protocol sequence
-  // ============================================================
+  c_read_addr_followed_by_read_data: cover property (p_read_addr_followed_by_read_data);
 
-  cover property (@(posedge clk)
-    (op_type == 2'b00) ##[1:5] (op_type == 2'b01) ##[1:5] (op_type == 2'b10) ##[1:5] (op_type == 2'b11));
 
 endmodule

@@ -17,17 +17,21 @@ always @(posedge clk) begin
         Rd_Addr <= 0;
         Wr_Addr <= 0;
     end
-    else                                           
+    else begin //bug                                      
         if (rx_valid) begin
             case (din[9:8])
                 2'b00 : Wr_Addr <= din[7:0];
                 2'b01 : MEM[Wr_Addr] <= din[7:0];
                 2'b10 : Rd_Addr <= din[7:0];
-                2'b11 : dout <= MEM[Wr_Addr];
+                2'b11 : begin
+                    dout <= MEM[Wr_Addr];
+                    //tx_valid <= 1;
+                end
                 default : dout <= 0;
             endcase
         end
-        tx_valid <= (din[9] && din[8] && rx_valid)? 1'b1 : 1'b0;
+        tx_valid <= (din[9:8] == 2'b11)? 1 : 0;
+    end
 end
 
 endmodule

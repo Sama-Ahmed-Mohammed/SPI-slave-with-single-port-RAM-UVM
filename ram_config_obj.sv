@@ -8,7 +8,7 @@ package ram_config_obj_pkg;
         `uvm_object_utils(ram_config_obj)
         
         virtual ram_if vif;
-        uvm_active_passive_enum is_active;
+        uvm_active_passive_enum is_active = UVM_ACTIVE;
 
         function new(string name = "obj");
             super.new(name);
